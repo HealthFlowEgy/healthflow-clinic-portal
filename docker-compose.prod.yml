@@ -1,0 +1,43 @@
+version: '3.8'
+
+# Production deployment configuration for HealthFlow Clinic Portal
+# Deploy on server: 138.197.16.43
+
+services:
+  clinic-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: healthflow-clinic-portal:${VERSION:-1.0}
+    container_name: healthflow-clinic-portal
+    restart: always
+    ports:
+      - "8085:80"  # Use different port to avoid conflicts
+    environment:
+      - NODE_ENV=production
+      - TZ=Africa/Cairo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    networks:
+      - healthflow-net
+
+networks:
+  healthflow-net:
+    driver: bridge
