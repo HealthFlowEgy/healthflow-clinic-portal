@@ -215,7 +215,7 @@ export default function CreatePrescription() {
         icdCode: selectedICD10?.code,
         clinicalNotes: clinicalNotes || undefined,
         medications: medications.map((med) => ({
-          medicineId: med.medicine?.id || generateUUID(),
+          medicineId: med.medicine?.drugId || med.medicine?.id || generateUUID(),
           medicineName: med.medicine?.commercialName || '',
           drugId: med.medicine?.drugId,
           medicineGenericName: med.medicine?.genericName,
