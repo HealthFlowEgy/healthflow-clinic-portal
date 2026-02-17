@@ -18,6 +18,7 @@ import {
   MenuItem,
   useMediaQuery,
   useTheme,
+  Chip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -27,6 +28,7 @@ import {
   Logout as LogoutIcon,
   Person as PersonIcon,
   LocalHospital as HospitalIcon,
+  VerifiedUser as VerifiedIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -60,10 +62,9 @@ export default function Layout() {
     setAnchorEl(null);
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     handleMenuClose();
-    await logout();
-    navigate('/login');
+    logout();
   };
 
   const handleNavClick = (path: string) => {
@@ -111,8 +112,20 @@ export default function Layout() {
 
       <Divider />
 
+      {/* SSO Badge */}
+      <Box sx={{ px: 2, pt: 2, pb: 1 }}>
+        <Chip
+          icon={<VerifiedIcon sx={{ fontSize: 16 }} />}
+          label="HCP Registry SSO"
+          size="small"
+          color="primary"
+          variant="outlined"
+          sx={{ fontSize: '0.7rem', height: 24 }}
+        />
+      </Box>
+
       {/* Navigation */}
-      <List sx={{ flex: 1, pt: 2, px: 1 }}>
+      <List sx={{ flex: 1, pt: 1, px: 1 }}>
         {navItems.map((item) => {
           const isActive = location.pathname === item.path || 
             (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
@@ -183,7 +196,7 @@ export default function Layout() {
               noWrap
               sx={{ lineHeight: 1.3 }}
             >
-              {user?.name || 'Doctor'}
+              {user?.name || 'Healthcare Professional'}
             </Typography>
             <Typography
               variant="caption"
@@ -191,8 +204,18 @@ export default function Layout() {
               noWrap
               sx={{ display: 'block' }}
             >
-              {user?.specialty || 'Physician'}
+              {user?.specialty || user?.role || 'Physician'}
             </Typography>
+            {user?.license && (
+              <Typography
+                variant="caption"
+                color="primary.main"
+                noWrap
+                sx={{ display: 'block', fontSize: '0.65rem' }}
+              >
+                License: {user.license}
+              </Typography>
+            )}
           </Box>
         </Box>
       </Box>
@@ -223,6 +246,19 @@ export default function Layout() {
           >
             <MenuIcon />
           </IconButton>
+
+          {/* NDP Platform Badge */}
+          <Chip
+            label="NDP Platform"
+            size="small"
+            sx={{
+              bgcolor: 'rgba(13, 127, 160, 0.1)',
+              color: 'primary.main',
+              fontWeight: 600,
+              fontSize: '0.7rem',
+              height: 24,
+            }}
+          />
 
           <Box sx={{ flexGrow: 1 }} />
 
@@ -256,11 +292,25 @@ export default function Layout() {
             PaperProps={{
               sx: {
                 mt: 1,
-                minWidth: 180,
+                minWidth: 200,
                 boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
               },
             }}
           >
+            <Box sx={{ px: 2, py: 1.5 }}>
+              <Typography variant="body2" fontWeight={600}>
+                {user?.name || 'Healthcare Professional'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {user?.email}
+              </Typography>
+              {user?.license && (
+                <Typography variant="caption" color="primary.main" sx={{ display: 'block' }}>
+                  License: {user.license}
+                </Typography>
+              )}
+            </Box>
+            <Divider />
             <MenuItem onClick={handleMenuClose}>
               <ListItemIcon>
                 <PersonIcon fontSize="small" />
@@ -272,7 +322,7 @@ export default function Layout() {
               <ListItemIcon>
                 <LogoutIcon fontSize="small" sx={{ color: 'error.main' }} />
               </ListItemIcon>
-              Logout
+              Sign Out (SSO)
             </MenuItem>
           </Menu>
         </Toolbar>

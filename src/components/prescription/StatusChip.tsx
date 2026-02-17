@@ -34,6 +34,12 @@ const statusConfig: Record<PrescriptionStatus, {
     icon: <PendingIcon />,
     bgcolor: '#fef3c7',
   },
+  active: {
+    label: 'Active',
+    color: 'success',
+    icon: <ApprovedIcon />,
+    bgcolor: '#d1fae5',
+  },
   approved: {
     label: 'Approved',
     color: 'success',

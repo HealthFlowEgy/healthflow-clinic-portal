@@ -12,14 +12,37 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api/v1': {
-        target: 'http://209.38.231.84:4002',
+      // NDP Platform API Gateway proxy (development only)
+      '/fhir': {
+        target: 'https://ndp-gateway.healthflow.tech',
         changeOrigin: true,
+        secure: true,
       },
-      '/api/auth': {
-        target: 'http://209.38.231.84:4003',
+      '/api/v1': {
+        target: 'https://ndp-gateway.healthflow.tech',
         changeOrigin: true,
-      }
+        secure: true,
+      },
+      '/api/prescriptions': {
+        target: 'https://ndp-gateway.healthflow.tech',
+        changeOrigin: true,
+        secure: true,
+      },
+      '/api/medications': {
+        target: 'https://ndp-gateway.healthflow.tech',
+        changeOrigin: true,
+        secure: true,
+      },
+      '/api/dispense': {
+        target: 'https://ndp-gateway.healthflow.tech',
+        changeOrigin: true,
+        secure: true,
+      },
+      '/api/recalls': {
+        target: 'https://ndp-gateway.healthflow.tech',
+        changeOrigin: true,
+        secure: true,
+      },
     }
   },
   build: {
@@ -29,7 +52,8 @@ export default defineConfig({
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'mui-vendor': ['@mui/material', '@mui/icons-material']
+          'mui-vendor': ['@mui/material', '@mui/icons-material'],
+          'keycloak': ['keycloak-js'],
         }
       }
     }

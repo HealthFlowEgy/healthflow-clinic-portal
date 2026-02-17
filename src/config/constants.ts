@@ -1,22 +1,36 @@
-// API Configuration
-export const AUTH_BASE_URL = import.meta.env.VITE_AUTH_BASE_URL || 'http://209.38.231.84:4003';
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://209.38.231.84:4002';
+// ============================================================
+// Keycloak SSO Configuration (HCP Registry Auth)
+// ============================================================
+export const KEYCLOAK_URL = import.meta.env.VITE_KEYCLOAK_URL || 'https://keycloak.healthflow.tech';
+export const KEYCLOAK_REALM = import.meta.env.VITE_KEYCLOAK_REALM || 'RegistryAdmin';
+export const KEYCLOAK_CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'clinic-portal';
+
+// ============================================================
+// NDP Platform API Configuration
+// ============================================================
+export const NDP_GATEWAY_URL = import.meta.env.VITE_NDP_GATEWAY_URL || 'https://ndp-gateway.healthflow.tech';
 export const API_VERSION = import.meta.env.VITE_API_VERSION || 'v1';
+
+// NDP Microservice URLs (used via API Gateway)
+export const PRESCRIPTION_API_URL = `${NDP_GATEWAY_URL}`;
+export const MEDICATION_API_URL = `${NDP_GATEWAY_URL}`;
+export const DISPENSE_API_URL = `${NDP_GATEWAY_URL}`;
+
+// HCP Registry API (for practitioner verification & signing)
+export const HPR_API_URL = import.meta.env.VITE_HPR_API_URL || 'https://registry.healthflow.tech';
 
 // Application Configuration
 export const APP_NAME = import.meta.env.VITE_APP_NAME || 'HealthFlow Clinic Portal';
-export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.0.0';
+export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '2.0.0';
 
-// Token Configuration
-export const TOKEN_KEY = 'healthflow_auth_token';
-export const REFRESH_TOKEN_KEY = 'healthflow_refresh_token';
+// Token Configuration (Keycloak manages tokens, but we store user info)
 export const USER_KEY = 'healthflow_user';
-export const TOKEN_EXPIRY_BUFFER = 60; // seconds before expiry to refresh
 
 // Prescription Status Configuration
 export const PRESCRIPTION_STATUS_LABELS: Record<string, string> = {
   draft: 'Draft',
   pending_validation: 'Pending Validation',
+  active: 'Active',
   approved: 'Approved',
   dispensed: 'Dispensed',
   cancelled: 'Cancelled',
@@ -27,6 +41,7 @@ export const PRESCRIPTION_STATUS_LABELS: Record<string, string> = {
 export const PRESCRIPTION_STATUS_COLORS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info'> = {
   draft: 'default',
   pending_validation: 'warning',
+  active: 'success',
   approved: 'success',
   dispensed: 'info',
   cancelled: 'error',

@@ -1,4 +1,6 @@
-// User and Authentication Types
+// ============================================================
+// User and Authentication Types (Keycloak SSO)
+// ============================================================
 export interface User {
   id: string;
   email: string;
@@ -22,7 +24,9 @@ export interface LoginCredentials {
   password: string;
 }
 
-// Patient Types
+// ============================================================
+// Patient Types (DPR - Digital Patient Registry)
+// ============================================================
 export interface Patient {
   id: string;
   name: string;
@@ -31,7 +35,26 @@ export interface Patient {
   nationalId: string;
 }
 
-// Doctor Types
+export interface PatientDemographics {
+  nationalId: string;
+  name: string;
+  dateOfBirth: string;
+  gender: 'male' | 'female';
+  age?: number;
+  verified: boolean;
+}
+
+export interface InsuranceCoverage {
+  nationalId: string;
+  enrolled: boolean;
+  tier: 'A' | 'B' | 'C' | 'D';
+  copayPercentage: number;
+  status: 'active' | 'inactive' | 'suspended';
+}
+
+// ============================================================
+// Doctor / Practitioner Types (HPR)
+// ============================================================
 export interface Doctor {
   id: string;
   name: string;
@@ -39,7 +62,9 @@ export interface Doctor {
   specialty: string;
 }
 
-// Medicine Types
+// ============================================================
+// Medicine Types (NDP Medication Directory - EDA Database)
+// ============================================================
 export interface Medicine {
   id: string;
   commercialName: string;
@@ -48,13 +73,19 @@ export interface Medicine {
   strength?: string;
   form?: string;
   drugId?: string;
+  edaCode?: string;
+  manufacturer?: string;
+  activeIngredient?: string;
 }
 
-// Medication Types
+// ============================================================
+// Medication Types (Prescription Line Items)
+// ============================================================
 export interface Medication {
   medicineId: string;
   medicineName: string;
   drugId?: string;
+  edaCode?: string;
   medicineGenericName?: string;
   medicineStrength?: string;
   medicineForm?: string;
@@ -73,10 +104,13 @@ export interface Medication {
   numberOfTimes?: number;
 }
 
-// Prescription Types
+// ============================================================
+// Prescription Types (NDP FHIR MedicationRequest)
+// ============================================================
 export type PrescriptionStatus = 
   | 'draft' 
   | 'pending_validation' 
+  | 'active'
   | 'approved' 
   | 'dispensed' 
   | 'cancelled' 
@@ -96,6 +130,12 @@ export interface Prescription {
   prescriptionDate: string;
   createdAt: string;
   updatedAt: string;
+  digitalSignature?: string;
+  aiValidation?: {
+    valid: boolean;
+    warnings: string[];
+    checkedAt: string;
+  };
 }
 
 export interface PrescriptionCreatePayload {
@@ -116,7 +156,20 @@ export interface PrescriptionHistoryItem {
   details?: string;
 }
 
+// ============================================================
+// Drug Interaction Types (NDP AI Validation Service)
+// ============================================================
+export interface DrugInteractionResult {
+  drug1: string;
+  drug2: string;
+  severity: 'low' | 'moderate' | 'high' | 'critical';
+  description: string;
+  recommendation: string;
+}
+
+// ============================================================
 // API Response Types
+// ============================================================
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -130,7 +183,9 @@ export interface PaginationParams {
   offset?: number;
 }
 
+// ============================================================
 // Dashboard Stats
+// ============================================================
 export interface DashboardStats {
   total: number;
   approved: number;
@@ -139,7 +194,9 @@ export interface DashboardStats {
   cancelled: number;
 }
 
+// ============================================================
 // ICD-10 Types
+// ============================================================
 export interface ICD10Code {
   code: string;
   description: string;
@@ -147,7 +204,9 @@ export interface ICD10Code {
   chapter?: string;
 }
 
+// ============================================================
 // Form Types
+// ============================================================
 export interface PatientFormData {
   name: string;
   age: number;
