@@ -140,7 +140,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem(USER_KEY);
     setUser(null);
     keycloak.logout({
-      redirectUri: window.location.origin + '/login',
+      redirectUri: window.location.origin + '/',
     });
   }, []);
 
