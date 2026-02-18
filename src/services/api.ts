@@ -216,6 +216,7 @@ class NDPApiService {
         id: generateLocalId(),
         prescriptionNumber: rxNum,
         status: 'draft',
+        prescriptionDate: now,
         doctor: data.doctor,
         patient: { ...data.patient, id: data.patient.id || generateLocalId() },
         diagnosis: data.diagnosis,
@@ -587,78 +588,6 @@ class NDPApiService {
     }
   }
 
-  // ============================================================
-  // FHIR Resource Mapping Helpers
-  // ============================================================
-
-  /**
-   * Convert application prescription payload to FHIR MedicationRequest format.
-   */
-  private toFhirMedicationRequest(data: PrescriptionCreatePayload): Record<string, unknown> {
-    return {
-      resourceType: 'MedicationRequest',
-      status: 'draft',
-      intent: 'order',
-      subject: {
-        reference: `Patient/${data.patient.nationalId}`,
-        display: data.patient.name,
-        identifier: {
-          system: 'urn:oid:2.16.818.1.1.1',  // Egypt National ID system
-          value: data.patient.nationalId,
-        },
-      },
-      requester: {
-        reference: `Practitioner/${data.doctor.license}`,
-        display: data.doctor.name,
-        identifier: {
-          system: 'urn:healthflow:hpr:license',
-          value: data.doctor.license,
-        },
-      },
-      reasonCode: data.icdCode ? [{
-        coding: [{
-          system: 'http://hl7.org/fhir/sid/icd-10',
-          code: data.icdCode,
-          display: data.diagnosis,
-        }],
-        text: data.diagnosis,
-      }] : [{ text: data.diagnosis }],
-      note: data.clinicalNotes ? [{ text: data.clinicalNotes }] : undefined,
-      // Application-specific fields passed through
-      patient: data.patient,
-      doctor: data.doctor,
-      diagnosis: data.diagnosis,
-      icdCode: data.icdCode,
-      clinicalNotes: data.clinicalNotes,
-      medications: data.medications,
-      medicationRequest: data.medications.map((med) => ({
-        medicationCodeableConcept: {
-          coding: [{
-            system: 'urn:eda:drug-registry',
-            code: med.drugId || med.medicineId,
-            display: med.medicineName,
-          }],
-        },
-        dosageInstruction: [{
-          text: `${med.dosage} - ${med.frequency} - ${med.duration}`,
-          timing: { code: { text: med.frequency } },
-          doseAndRate: [{
-            doseQuantity: {
-              value: med.doseQuantity || parseFloat(med.dosage) || 1,
-              unit: med.medicineForm || 'dose',
-            },
-          }],
-        }],
-        dispenseRequest: {
-          quantity: {
-            value: med.quantity,
-            unit: med.medicineForm || 'unit',
-          },
-          numberOfRepeatsAllowed: med.refills || 0,
-        },
-      })),
-    };
-  }
 }
 
 export const apiService = new NDPApiService();
