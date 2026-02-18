@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -13,9 +14,55 @@ import {
 import {
   Delete as DeleteIcon,
   MedicationLiquid as MedicineIcon,
+  Calculate as CalcIcon,
 } from '@mui/icons-material';
 import { FREQUENCY_OPTIONS, DURATION_OPTIONS } from '../../config/constants';
 import type { MedicationFormData } from '../../types';
+
+// Maps frequency value to doses per day
+function getFrequencyPerDay(frequency: string): number {
+  const map: Record<string, number> = {
+    once_daily: 1,
+    twice_daily: 2,
+    three_times_daily: 3,
+    four_times_daily: 4,
+    every_4_hours: 6,
+    every_6_hours: 4,
+    every_8_hours: 3,
+    every_12_hours: 2,
+    as_needed: 1, // default to 1 for PRN
+    before_meals: 3,
+    after_meals: 3,
+    at_bedtime: 1,
+    weekly: 1 / 7, // fractional — will be rounded up
+  };
+  return map[frequency] ?? 0;
+}
+
+// Maps duration value to number of days
+function getDurationDays(duration: string): number {
+  const map: Record<string, number> = {
+    '3_days': 3,
+    '5_days': 5,
+    '7_days': 7,
+    '10_days': 10,
+    '14_days': 14,
+    '21_days': 21,
+    '30_days': 30,
+    '60_days': 60,
+    '90_days': 90,
+    ongoing: 30, // default to 30 for ongoing
+  };
+  return map[duration] ?? 0;
+}
+
+// Calculate quantity = doses_per_day × days (rounded up)
+function calculateQuantity(frequency: string, duration: string): number {
+  const perDay = getFrequencyPerDay(frequency);
+  const days = getDurationDays(duration);
+  if (perDay === 0 || days === 0) return 0;
+  return Math.ceil(perDay * days);
+}
 
 interface MedicationListProps {
   medications: MedicationFormData[];
@@ -30,6 +77,20 @@ export default function MedicationList({
   onRemove,
   errors = {},
 }: MedicationListProps) {
+  // Auto-calculate quantity whenever frequency or duration changes
+  useEffect(() => {
+    medications.forEach((med, index) => {
+      if (med.frequency && med.duration) {
+        const calculated = calculateQuantity(med.frequency, med.duration);
+        if (calculated > 0 && calculated !== med.quantity) {
+          onUpdate(index, 'quantity', calculated);
+        }
+      }
+    });
+    // Only run when frequency/duration values change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [medications.map((m) => `${m.frequency}|${m.duration}`).join(',')]);
+
   if (medications.length === 0) {
     return (
       <Paper
@@ -57,7 +118,11 @@ export default function MedicationList({
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {medications.map((medication, index) => {
         const fieldErrors = errors[index] || {};
-        
+        const isAutoCalculated = !!(medication.frequency && medication.duration);
+        const calculatedQty = isAutoCalculated
+          ? calculateQuantity(medication.frequency, medication.duration)
+          : 0;
+
         return (
           <Paper
             key={index}
@@ -111,8 +176,13 @@ export default function MedicationList({
                   )}
                 </Box>
               </Box>
-              
+
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Chip
+                  label={`#${index + 1}`}
+                  size="small"
+                  sx={{ bgcolor: 'primary.50', color: 'primary.700', fontWeight: 600 }}
+                />
                 {medication.medicine?.strength && (
                   <Chip
                     label={medication.medicine.strength}
@@ -150,7 +220,7 @@ export default function MedicationList({
                     helperText={fieldErrors.dosage}
                   />
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     fullWidth
@@ -172,7 +242,7 @@ export default function MedicationList({
                     ))}
                   </TextField>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     fullWidth
@@ -194,7 +264,7 @@ export default function MedicationList({
                     ))}
                   </TextField>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     fullWidth
@@ -204,11 +274,24 @@ export default function MedicationList({
                     value={medication.quantity || ''}
                     onChange={(e) => onUpdate(index, 'quantity', parseInt(e.target.value) || 0)}
                     error={!!fieldErrors.quantity}
-                    helperText={fieldErrors.quantity}
-                    InputProps={{ inputProps: { min: 1 } }}
+                    helperText={
+                      fieldErrors.quantity
+                        ? fieldErrors.quantity
+                        : isAutoCalculated && calculatedQty > 0
+                        ? `Auto-calculated: ${getFrequencyPerDay(medication.frequency)} × ${getDurationDays(medication.duration)} days`
+                        : 'Set frequency & duration to auto-calculate'
+                    }
+                    InputProps={{
+                      inputProps: { min: 1 },
+                      endAdornment: isAutoCalculated && calculatedQty > 0 ? (
+                        <Tooltip title="Auto-calculated from frequency × duration">
+                          <CalcIcon sx={{ fontSize: 18, color: 'success.main', mr: 0.5 }} />
+                        </Tooltip>
+                      ) : undefined,
+                    }}
                   />
                 </Grid>
-                
+
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -226,9 +309,9 @@ export default function MedicationList({
           </Paper>
         );
       })}
-      
+
       <Divider sx={{ my: 1 }}>
-        <Chip 
+        <Chip
           label={`${medications.length} medication${medications.length !== 1 ? 's' : ''}`}
           size="small"
           sx={{ bgcolor: 'primary.50', color: 'primary.700' }}

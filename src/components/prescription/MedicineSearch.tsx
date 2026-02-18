@@ -29,6 +29,8 @@ export default function MedicineSearch({
   const [options, setOptions] = useState<Medicine[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  // Use a key to force re-mount the Autocomplete after each selection
+  const [resetKey, setResetKey] = useState(0);
 
   // Search medicines with direct API call
   useEffect(() => {
@@ -90,9 +92,11 @@ export default function MedicineSearch({
       if (value) {
         console.log('[MedicineSearch] Medicine selected:', value);
         onSelect(value);
-        // Clear input after selection
+        // Force full reset: clear state and re-mount the Autocomplete
         setInputValue('');
         setOptions([]);
+        setOpen(false);
+        setResetKey((prev) => prev + 1);
       }
     },
     [onSelect]
@@ -100,6 +104,8 @@ export default function MedicineSearch({
 
   return (
     <Autocomplete
+      key={resetKey}
+      value={null}
       open={open}
       onOpen={() => setOpen(true)}
       onClose={() => setOpen(false)}
@@ -112,6 +118,8 @@ export default function MedicineSearch({
       getOptionLabel={(option) => option.commercialName || ''}
       isOptionEqualToValue={(option, value) => option.id === value.id}
       filterOptions={(x) => x} // Disable client-side filtering
+      clearOnBlur={false}
+      blurOnSelect={false}
       noOptionsText={
         inputValue.length < 2
           ? 'Type at least 2 characters to search...'
@@ -124,7 +132,8 @@ export default function MedicineSearch({
           {...params}
           label={label}
           error={error}
-          helperText={helperText}
+          helperText={helperText || 'Search and select a medicine to add. You can add multiple medications.'}
+          placeholder="Type medicine name to search..."
           InputProps={{
             ...params.InputProps,
             endAdornment: (
