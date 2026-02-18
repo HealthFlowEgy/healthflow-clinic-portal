@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/ndp-api/:path*", "destination": "http://209.38.231.84:4002/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
