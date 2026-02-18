@@ -112,8 +112,8 @@ export default function Layout() {
 
       <Divider />
 
-      {/* SSO Badge */}
-      <Box sx={{ px: 2, pt: 2, pb: 1 }}>
+      {/* SSO Badge & Role */}
+      <Box sx={{ px: 2, pt: 2, pb: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
         <Chip
           icon={<VerifiedIcon sx={{ fontSize: 16 }} />}
           label="HCP Registry SSO"
@@ -122,6 +122,14 @@ export default function Layout() {
           variant="outlined"
           sx={{ fontSize: '0.7rem', height: 24 }}
         />
+        {user?.role === 'doctor' && (
+          <Chip
+            label="Doctor"
+            size="small"
+            color="success"
+            sx={{ fontSize: '0.7rem', height: 24, fontWeight: 600 }}
+          />
+        )}
       </Box>
 
       {/* Navigation */}
@@ -204,8 +212,18 @@ export default function Layout() {
               noWrap
               sx={{ display: 'block' }}
             >
-              {user?.specialty || user?.role || 'Physician'}
+              {user?.role === 'doctor' ? (user?.specialty || 'Doctor') : (user?.role || 'Staff')}
             </Typography>
+            {user?.clinicName && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                noWrap
+                sx={{ display: 'block', fontSize: '0.65rem' }}
+              >
+                {user.clinicName}
+              </Typography>
+            )}
             {user?.license && (
               <Typography
                 variant="caption"

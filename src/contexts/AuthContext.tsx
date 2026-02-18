@@ -41,6 +41,7 @@ function extractUserFromKeycloak(): User | null {
     role: mapKeycloakRole(token),
     license: (token.license_number as string) || (token.license as string) || undefined,
     specialty: (token.specialty as string) || (token.specialization as string) || undefined,
+    clinicName: (token.clinic_name as string) || undefined,
   };
 
   return user;
@@ -50,15 +51,18 @@ function extractUserFromKeycloak(): User | null {
  * Map Keycloak realm/client roles to application roles.
  */
 function mapKeycloakRole(token: Record<string, unknown>): 'doctor' | 'clinic_staff' {
-  // Check realm roles
+  // Check realm roles from realm_access (standard Keycloak claim)
   const realmAccess = token.realm_access as { roles?: string[] } | undefined;
   const roles = realmAccess?.roles || [];
+
+  // Check custom realm_roles claim (from our dedicated mapper)
+  const customRealmRoles = token.realm_roles as string[] | undefined;
 
   // Check client-specific roles
   const resourceAccess = token.resource_access as Record<string, { roles?: string[] }> | undefined;
   const clientRoles = resourceAccess?.['clinic-portal']?.roles || [];
 
-  const allRoles = [...roles, ...clientRoles];
+  const allRoles = [...roles, ...(customRealmRoles || []), ...clientRoles];
 
   if (allRoles.some(r => ['doctor', 'physician', 'prescriber'].includes(r.toLowerCase()))) {
     return 'doctor';

@@ -8,6 +8,7 @@ export interface User {
   name: string;
   license?: string;
   specialty?: string;
+  clinicName?: string;
 }
 
 export interface AuthResponse {
