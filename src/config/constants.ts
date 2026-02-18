@@ -12,13 +12,19 @@ export const NDP_GATEWAY_URL = import.meta.env.VITE_NDP_GATEWAY_URL || 'https://
 export const API_VERSION = import.meta.env.VITE_API_VERSION || 'v1';
 
 // NDP Microservice URLs (used via API Gateway)
-export const PRESCRIPTION_API_URL = `${NDP_GATEWAY_URL}`;
+// In production (HTTPS), use Vercel rewrite proxy to avoid mixed content.
+// In development, use the direct HTTP URL via Vite proxy.
+export const PRESCRIPTION_API_URL = import.meta.env.DEV
+  ? (import.meta.env.VITE_PRESCRIPTION_API_URL || 'http://209.38.231.84:4002')
+  : '/ndp-api';
 // In production (HTTPS), use Vercel rewrite proxy to avoid mixed content.
 // In development, use the direct HTTP URL via Vite proxy.
 export const MEDICATION_API_URL = import.meta.env.DEV
   ? (import.meta.env.VITE_MEDICATION_API_URL || 'http://209.38.231.84:4002')
   : '/ndp-api';
-export const DISPENSE_API_URL = `${NDP_GATEWAY_URL}`;
+export const DISPENSE_API_URL = import.meta.env.DEV
+  ? (import.meta.env.VITE_DISPENSE_API_URL || 'http://209.38.231.84:4002')
+  : '/ndp-api';
 
 // HCP Registry API (for practitioner verification & signing)
 export const HPR_API_URL = import.meta.env.VITE_HPR_API_URL || 'https://registry.healthflow.tech';
