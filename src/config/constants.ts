@@ -13,7 +13,7 @@ export const API_VERSION = import.meta.env.VITE_API_VERSION || 'v1';
 
 // NDP Microservice URLs (used via API Gateway)
 export const PRESCRIPTION_API_URL = `${NDP_GATEWAY_URL}`;
-export const MEDICATION_API_URL = `${NDP_GATEWAY_URL}`;
+export const MEDICATION_API_URL = import.meta.env.VITE_MEDICATION_API_URL || 'http://209.38.231.84:4002';
 export const DISPENSE_API_URL = `${NDP_GATEWAY_URL}`;
 
 // HCP Registry API (for practitioner verification & signing)

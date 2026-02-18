@@ -16,6 +16,7 @@ import type {
 } from '../types';
 import { 
   NDP_GATEWAY_URL, 
+  MEDICATION_API_URL,
   HPR_API_URL,
   USER_KEY,
 } from '../config/constants';
@@ -47,9 +48,9 @@ class NDPApiService {
       timeout: 15000,
     });
 
-    // Medication Directory client (NDP Gateway → Medication Directory :3003)
+    // Medication Directory client (NDP Medication Directory API)
     this.medicationClient = axios.create({
-      baseURL: NDP_GATEWAY_URL,
+      baseURL: MEDICATION_API_URL,
       headers: { 'Content-Type': 'application/json' },
       timeout: 15000,
     });
@@ -359,35 +360,35 @@ class NDPApiService {
   // ============================================================
 
   /**
-   * Search medications by code, name, or ingredient
-   * GET /fhir/MedicationKnowledge
+   * Search medications by name in the EDA drug database
+   * GET /api/v1/medicines/search?q={query}&limit={limit}
    */
   async searchMedicines(query: string, limit: number = 20): Promise<ApiResponse<Medicine[]>> {
     const response = await this.medicationClient.get<ApiResponse<Medicine[]>>(
-      '/fhir/MedicationKnowledge',
-      { params: { name: query, _count: limit } }
+      '/api/v1/medicines/search',
+      { params: { q: query, limit } }
     );
     return response.data;
   }
 
   /**
-   * Get medication details by EDA code
-   * GET /fhir/MedicationKnowledge/{id}
+   * Get medication details by ID
+   * GET /api/v1/medicines/{id}
    */
   async getMedicine(id: string): Promise<ApiResponse<Medicine>> {
     const response = await this.medicationClient.get<ApiResponse<Medicine>>(
-      `/fhir/MedicationKnowledge/${id}`
+      `/api/v1/medicines/${id}`
     );
     return response.data;
   }
 
   /**
-   * Simplified search for POS systems
-   * GET /api/medications/search
+   * List medicines with pagination
+   * GET /api/v1/medicines
    */
   async listMedicines(params?: PaginationParams): Promise<ApiResponse<Medicine[]>> {
     const response = await this.medicationClient.get<ApiResponse<Medicine[]>>(
-      '/api/medications/search',
+      '/api/v1/medicines',
       { params }
     );
     return response.data;
